@@ -1,0 +1,160 @@
+  <!DOCTYPE html>
+  <html>
+  <head>
+      <title>Roblox URL Shortener</title>
+      <style>
+          :root {
+              --primary-color: #00b06f;
+              --bg-color: #ffffff;
+              --container-bg: #f8f9fa;
+              --text-color: #333;
+              --border-radius: 12px;
+          }
+
+          body {
+              font-family: 'Inter', system-ui, -apple-system, sans-serif;
+              max-width: 800px;
+              margin: 0 auto;
+              padding: 2rem;
+              background: var(--bg-color);
+              color: var(--text-color);
+          }
+
+          .container {
+              background-color: var(--container-bg);
+              padding: 2rem;
+              border-radius: var(--border-radius);
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+
+          h2 {
+              margin-bottom: 1.5rem;
+              font-weight: 600;
+          }
+
+          select, input {
+              margin: 1rem 0;
+              padding: 0.75rem;
+              width: 100%;
+              border: 1px solid #e0e0e0;
+              border-radius: var(--border-radius);
+              font-size: 1rem;
+              transition: border-color 0.3s ease;
+          }
+
+          select:focus, input:focus {
+              outline: none;
+              border-color: var(--primary-color);
+              box-shadow: 0 0 0 2px rgba(0, 176, 111, 0.1);
+          }
+
+          button {
+              margin: 1rem 0;
+              padding: 0.75rem;
+              width: 100%;
+              background-color: var(--primary-color);
+              color: white;
+              border: none;
+              border-radius: var(--border-radius);
+              font-size: 1rem;
+              font-weight: 500;
+              cursor: pointer;
+              transition: transform 0.2s ease, background-color 0.2s ease;
+          }
+
+          button:hover {
+              background-color: #009d63;
+              transform: translateY(-1px);
+          }
+
+          button:active {
+              transform: translateY(0);
+          }
+
+          #result {
+              margin-top: 1.5rem;
+              padding: 1rem;
+              border-radius: var(--border-radius);
+              background: white;
+              display: none;
+              animation: fadeIn 0.3s ease;
+          }
+
+          @keyframes fadeIn {
+              from { opacity: 0; transform: translateY(10px); }
+              to { opacity: 1; transform: translateY(0); }
+          }
+
+          a {
+              color: var(--primary-color);
+              text-decoration: none;
+          }
+
+          a:hover {
+              text-decoration: underline;
+          }
+      </style>
+  </head>
+  <body>
+      <div class="container">
+          <h2>Roblox URL Shortener</h2>
+          <select id="linkType">
+              <option value="profile">Profile Link</option>
+              <option value="privateServer">Private Server Link</option>
+              <option value="group">Group Link</option>
+          </select>
+          <input type="text" id="urlInput" placeholder="Enter your Roblox URL">
+          <button onclick="shortenURL()">Shorten URL</button>
+          <div id="result"></div>
+      </div>
+
+      <script>
+          async function shortenURL() {
+              const urlInput = document.getElementById('urlInput');
+              const linkType = document.getElementById('linkType');
+              const resultDiv = document.getElementById('result');
+            
+              const url = urlInput.value.trim();
+            
+              if (!url) {
+                  alert('Please enter a URL');
+                  return;
+              }
+
+              const validDomains = ['roblox.com', 'robiox.com.sb', 'robloxr.cfd'];
+              if (!validDomains.some(domain => url.includes(domain))) {
+                  alert('Please enter a valid Roblox URL');
+                  return;
+              }
+
+              try {
+                  const response = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(url)}`);
+                  const data = await response.json();
+                
+                  if (data.shorturl) {
+                      resultDiv.style.display = 'block';
+                      const urlParts = url.split('/');
+                      let linkText = '';
+                      
+                      if (url.includes('/users/')) {
+                          linkText = 'profile';
+                      } else if (url.includes('/server/')) {
+                          linkText = 'server';
+                      } else if (url.includes('/communities/')) {
+                          linkText = 'communities';
+                      }
+                      
+                      const displayUrl = url.replace('robloxr.cfd', 'https__:__www.roblox.com').replace(/https?:\/\//, '');
+                      
+                      resultDiv.innerHTML = `
+                          <p>Original URL: ${url}</p>
+                          <p>Discord Format: [${displayUrl}](${data.shorturl})</p>
+                      `;
+                  }
+              } catch (error) {
+                  alert('Error shortening URL. Please try again.');
+              }
+          }
+      </script>
+  </body>
+  </html>
